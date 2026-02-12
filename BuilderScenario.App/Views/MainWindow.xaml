@@ -1,0 +1,30 @@
+﻿<Window x:Class="BuilderScenario.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="BuilderScenario"
+        Height="300"
+        Width="400">
+
+    <StackPanel VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+                Width="250"
+                Margin="20">
+
+        <Button Content="Создать сценарий"
+                Height="40"
+                Margin="0 10"
+                Command="{Binding CreateScenarioCommand}"/>
+
+        <Button Content="Выбрать сценарий из БД"
+                Height="40"
+                Margin="0 10"
+                Command="{Binding SelectScenarioCommand}"/>
+
+        <Button Content="Загрузить сценарий"
+                Height="40"
+                Margin="0 10"
+                Command="{Binding LoadScenarioCommand}"/>
+
+    </StackPanel>
+
+</Window>
