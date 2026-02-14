@@ -18,19 +18,88 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border BorderBrush="Gray"
-                                BorderThickness="1"
-                                CornerRadius="5"
-                                Margin="0 0 0 10"
-                                Padding="10">
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Margin="0 0 0 15"
+                    Padding="10">
 
                             <StackPanel>
 
-                                <TextBox Text="{Binding Name}"
-                                         Height="30"
-                                         Margin="0 0 0 10"/>
+                                <!-- Название группы -->
+                                <TextBox Text="{Binding Name,
+                                                UpdateSourceTrigger=PropertyChanged,
+                                                ValidatesOnNotifyDataErrors=True}"
+                             Height="30"
+                             Margin="0 0 0 10"/>
 
+                                <!-- Шаги -->
+                                <ItemsControl ItemsSource="{Binding Steps}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="LightGray"
+                                        BorderThickness="1"
+                                        CornerRadius="5"
+                                        Margin="0 0 0 10"
+                                        Padding="10">
+
+                                                <StackPanel>
+
+                                                    <!-- Название шага -->
+                                                    <TextBox Text="{Binding Name,
+                                                                    UpdateSourceTrigger=PropertyChanged,
+                                                                    ValidatesOnNotifyDataErrors=True}"
+                                                     Height="28"
+                                                     Margin="0 0 0 10"/>
+
+                                                    <Button Content="Удалить шаг"
+                                                    Margin="0 5 0 0"
+                                                    Command="{Binding DataContext.DeleteStepCommand,
+                                                              RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                    CommandParameter="{Binding}"/>
+
+                                                    <!-- Действия -->
+                                                    <ItemsControl ItemsSource="{Binding Actions}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBox Text="{Binding Name,
+                                                                                    UpdateSourceTrigger=PropertyChanged,
+                                                                                    ValidatesOnNotifyDataErrors=True}"
+                                                                     Width="300"
+                                                                     Margin="0 0 5 0"/>
+
+                                                                    <Button Content="X"
+                                                                    Width="30"
+                                                                    Command="{Binding DataContext.DeleteActionCommand,
+                                                                              RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    CommandParameter="{Binding}"/>          
+                                                                </StackPanel>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+
+                                                    <Button Content="Добавить действие"
+                                                Height="30"
+                                                Margin="0 5 0 0"
+                                                Command="{Binding AddActionCommand}"/>
+
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <Button Content="Добавить шаг"
+                            Height="35"
+                            Margin="0 5 0 0"
+                            Command="{Binding AddStepCommand}"/>
+
+                                <Button Content="Удалить группу"
+                                Margin="0 5 0 0"
+                                Command="{Binding DataContext.DeleteGroupCommand,
+                                            RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding}"/>
                             </StackPanel>
-
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
@@ -48,5 +117,19 @@
 
         </StackPanel>
     </ScrollViewer>
+
+    <Window.Resources>
+        <Style TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="BorderBrush" Value="Red"/>
+                    <Setter Property="BorderThickness" Value="2"/>
+                    <Setter Property="ToolTip"
+                    Value="{Binding RelativeSource={RelativeSource Self},
+                            Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
 
 </Window>

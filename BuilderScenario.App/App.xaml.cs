@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 using BuilderScenario.Application.Interfaces;
 using BuilderScenario.Infrastructure.Services;
+using Microsoft.EntityFrameworkCore;
+using BuilderScenario.Infrastructure.Data;
 
 namespace BuilderScenario.App
 {
@@ -19,6 +21,10 @@ namespace BuilderScenario.App
 
             ServiceProvider = services.BuildServiceProvider();
 
+            var scope = ServiceProvider.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ScenarioDbContext>();
+            db.Database.EnsureCreated();
+
             var mainWindow = ServiceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
         }
@@ -30,6 +36,9 @@ namespace BuilderScenario.App
             services.AddSingleton<MainWindow>();
             services.AddTransient<CreateScenarioViewModel>();
             services.AddTransient<CreateScenarioWindow>();
+            services.AddDbContext<ScenarioDbContext>(options =>
+                options.UseSqlite("Data Source=scenarios.db"));
+            services.AddScoped<ScenarioRepository>();
         }
     }
 }

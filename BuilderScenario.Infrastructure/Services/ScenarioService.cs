@@ -28,7 +28,7 @@ namespace BuilderScenario.Infrastructure.Services
             return Task.FromResult(_storage.ToList());
         }
 
-        public Task<Scenario> GetByIdAsync(Guid id)
+        public Task<Scenario> GetByIdAsync(int id)
         {
             return Task.FromResult(_storage.FirstOrDefault(x => x.Id == id));
         }

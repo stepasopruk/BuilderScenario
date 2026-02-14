@@ -9,6 +9,6 @@ namespace BuilderScenario.Application.Interfaces
     {
         Task SaveAsync(Scenario scenario);
         Task<List<Scenario>> GetAllAsync();
-        Task<Scenario> GetByIdAsync(Guid id);
+        Task<Scenario> GetByIdAsync(int id);
     }
 }
