@@ -1,11 +1,12 @@
 ﻿using BuilderScenario.App.ViewModels;
 using BuilderScenario.App.Views;
-using Microsoft.Extensions.DependencyInjection;
-using System.Windows;
 using BuilderScenario.Application.Interfaces;
+using BuilderScenario.Infrastructure.Data;
 using BuilderScenario.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using BuilderScenario.Infrastructure.Data;
+using Microsoft.Extensions.DependencyInjection;
+using System.IO;
+using System.Windows;
 
 namespace BuilderScenario.App
 {
@@ -31,14 +32,23 @@ namespace BuilderScenario.App
 
         private void ConfigureServices(IServiceCollection services)
         {
+            var dbPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "BuilderScenario",
+                "scenarios.db");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(dbPath)!);
+
             services.AddSingleton<MainViewModel>();
             services.AddSingleton<IScenarioService, ScenarioService>();
             services.AddSingleton<MainWindow>();
             services.AddTransient<CreateScenarioViewModel>();
             services.AddTransient<CreateScenarioWindow>();
             services.AddDbContext<ScenarioDbContext>(options =>
-                options.UseSqlite("Data Source=scenarios.db"));
+                    options.UseSqlite($"Data Source={dbPath}"));
             services.AddScoped<ScenarioRepository>();
+            services.AddTransient<ScenarioListViewModel>();
+            services.AddTransient<ScenarioListWindow>();
         }
     }
 }

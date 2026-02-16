@@ -10,6 +10,7 @@ namespace BuilderScenario.App.ViewModels
         public RelayCommand CreateScenarioCommand { get; }
         public RelayCommand SelectScenarioCommand { get; }
         public RelayCommand LoadScenarioCommand { get; }
+        public RelayCommand OpenScenarioListCommand { get; }
 
         private readonly IServiceProvider _serviceProvider;
 
@@ -20,6 +21,12 @@ namespace BuilderScenario.App.ViewModels
             CreateScenarioCommand = new RelayCommand(_ =>
             {
                 var window = _serviceProvider.GetRequiredService<CreateScenarioWindow>();
+                window.Show();
+            });
+
+            OpenScenarioListCommand = new RelayCommand(_ =>
+            {
+                var window = ActivatorUtilities.CreateInstance<ScenarioListWindow>(_serviceProvider);
                 window.Show();
             });
         }

@@ -13,7 +13,7 @@ namespace BuilderScenario.App.ViewModels
     {
         public RelayCommand DeleteGroupCommand { get; }
 
-        public Scenario Scenario { get; } = new();
+        public Scenario Scenario { get; private set; }
 
         public string ScenarioName
         {
@@ -36,6 +36,7 @@ namespace BuilderScenario.App.ViewModels
         public CreateScenarioViewModel(ScenarioRepository repository)
         {
             _repository = repository;
+            Scenario = new Scenario();
 
             AddGroupCommand = new RelayCommand(_ => AddGroup());
 
@@ -44,11 +45,32 @@ namespace BuilderScenario.App.ViewModels
             DeleteGroupCommand = new RelayCommand(DeleteGroup);
 
             Groups.CollectionChanged += (_, __) => SaveCommand.RaiseCanExecuteChanged();
+            Groups.CollectionChanged += (_, __) => RecalculateGroupOrder();
+        }
+
+        public void LoadScenario(Scenario scenario)
+        {
+            Scenario = scenario;
+
+            Groups.Clear();
+
+            foreach (var group in scenario.Groups)
+                Groups.Add(new ActionGroupViewModel(group, this));
+
+            NotifyStateChanged();
         }
 
         public void NotifyStateChanged()
         {
             SaveCommand.RaiseCanExecuteChanged();
+        }
+
+        public void RecalculateGroupOrder()
+        {
+            for (int i = 0; i < Groups.Count; i++)
+                Groups[i].Model.Order = i;
+
+            NotifyStateChanged();
         }
 
         private void AddGroup()

@@ -2,6 +2,7 @@
 using BuilderScenario.Core.Entities;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace BuilderScenario.App.ViewModels
 {
@@ -41,6 +42,15 @@ namespace BuilderScenario.App.ViewModels
             ValidateName();
 
             PropertyChanged += (_, __) => _parent.NotifyStateChanged();
+            Steps.CollectionChanged += (_, __) => RecalculateStepOrder();
+        }
+
+        public void RecalculateStepOrder()
+        {
+            for (int i = 0; i < Steps.Count; i++)
+                Steps[i].Model.Order = i;
+
+            _parent.NotifyStateChanged();
         }
 
         private void AddStep()

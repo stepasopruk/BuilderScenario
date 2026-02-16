@@ -1,0 +1,34 @@
+﻿<Window x:Class="BuilderScenario.App.Views.ScenarioListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Сценарии"
+        Height="400"
+        Width="600">
+
+    <StackPanel Margin="15">
+
+        <Button Content="Обновить"
+                Height="30"
+                Command="{Binding RefreshCommand}"/>
+
+        <ListBox ItemsSource="{Binding Scenarios}"
+                 Margin="0 10 0 0"
+                 Height="250">
+
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Name}"
+                                   Width="400"/>
+                        <Button Content="Открыть"
+                                Command="{Binding DataContext.OpenCommand,
+                                          RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+
+        </ListBox>
+
+    </StackPanel>
+</Window>
