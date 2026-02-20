@@ -1,6 +1,8 @@
 ﻿using BuilderScenario.App.Common;
 using BuilderScenario.Core.Entities;
+using GongSolutions.Wpf.DragDrop;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -9,6 +11,16 @@ namespace BuilderScenario.App.ViewModels
     public class ActionGroupViewModel : BaseViewModel
     {
         public ActionGroup Model { get; }
+
+        public int Id
+        {
+            get => Model.Id;
+            set
+            {
+                Model.Id = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string Name
         {
@@ -21,8 +33,19 @@ namespace BuilderScenario.App.ViewModels
             }
         }
 
-        public ObservableCollection<StepViewModel> Steps { get; }
-            = new();
+        public int Order
+        {
+            get => Model.Order;
+            set
+            {
+                Model.Order = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public IDropTarget StepDropHandler { get; }
+
+        public ObservableCollection<StepViewModel> Steps { get; set; } = new();
 
         public RelayCommand AddStepCommand { get; }
         public RelayCommand DeleteStepCommand { get; }
@@ -33,6 +56,7 @@ namespace BuilderScenario.App.ViewModels
         {
             Model = model;
             _parent = parent;
+            StepDropHandler = new StepDropHandler();
 
             foreach (var step in model.Steps)
                 Steps.Add(new StepViewModel(step, _parent));
@@ -42,15 +66,7 @@ namespace BuilderScenario.App.ViewModels
             ValidateName();
 
             PropertyChanged += (_, __) => _parent.NotifyStateChanged();
-            Steps.CollectionChanged += (_, __) => RecalculateStepOrder();
-        }
-
-        public void RecalculateStepOrder()
-        {
-            for (int i = 0; i < Steps.Count; i++)
-                Steps[i].Model.Order = i;
-
-            _parent.NotifyStateChanged();
+            Steps.CollectionChanged += Steps_CollectionChanged;
         }
 
         private void AddStep()
@@ -80,6 +96,14 @@ namespace BuilderScenario.App.ViewModels
         {
             for (int i = 0; i < Steps.Count; i++)
                 Steps[i].Model.Order = i;
+        }
+
+        private void Steps_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            for (int i = 0; i < Steps.Count; i++)
+            {
+                Steps[i].Order = i;
+            }
         }
 
         private void ValidateName()

@@ -17,8 +17,8 @@ namespace BuilderScenario.Infrastructure.Services
         {
             var existing = await _context.Scenarios
                 .Include(s => s.Groups)
-                    .ThenInclude(g => g.Steps)
-                        .ThenInclude(st => st.Actions)
+                .ThenInclude(g => g.Steps)
+                .ThenInclude(st => st.Actions)
                 .FirstOrDefaultAsync(s => s.Id == scenario.Id);
 
             if (existing == null)
@@ -27,10 +27,37 @@ namespace BuilderScenario.Infrastructure.Services
             }
             else
             {
-                // Обновляем простые свойства
-                _context.Entry(existing).CurrentValues.SetValues(scenario);
+                existing.Name = scenario.Name;
 
-                SyncGroups(existing, scenario);
+                // обновляем порядок групп
+                for (int i = 0; i < scenario.Groups.Count; i++)
+                {
+                    var incomingGroup = scenario.Groups[i];
+                    var existingGroup = existing.Groups
+                        .First(g => g.Id == incomingGroup.Id);
+
+                    existingGroup.Order = i;
+
+                    // шаги
+                    for (int j = 0; j < incomingGroup.Steps.Count; j++)
+                    {
+                        var incomingStep = incomingGroup.Steps[j];
+                        var existingStep = existingGroup.Steps
+                            .First(s => s.Id == incomingStep.Id);
+
+                        existingStep.Order = j;
+
+                        // действия
+                        for (int k = 0; k < incomingStep.Actions.Count; k++)
+                        {
+                            var incomingAction = incomingStep.Actions[k];
+                            var existingAction = existingStep.Actions
+                                .First(a => a.Id == incomingAction.Id);
+
+                            existingAction.Order = k;
+                        }
+                    }
+                }
             }
 
             await _context.SaveChangesAsync();
@@ -45,11 +72,36 @@ namespace BuilderScenario.Infrastructure.Services
 
         public async Task<Scenario?> GetByIdAsync(int id)
         {
-            return await _context.Scenarios
-                .Include(s => s.Groups)
-                    .ThenInclude(g => g.Steps)
-                        .ThenInclude(st => st.Actions)
-                .FirstOrDefaultAsync(s => s.Id == id);
+            var scenario = await _context.Scenarios
+        .Include(s => s.Groups)
+            .ThenInclude(g => g.Steps)
+                .ThenInclude(st => st.Actions)
+        .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (scenario == null)
+                return null;
+
+            // Сортировка по Order
+            scenario.Groups = scenario.Groups
+                .OrderBy(g => g.Order)
+                .Select(g =>
+                {
+                    g.Steps = g.Steps
+                        .OrderBy(s => s.Order)
+                        .Select(s =>
+                        {
+                            s.Actions = s.Actions
+                                .OrderBy(a => a.Order)
+                                .ToList();
+                            return s;
+                        })
+                        .ToList();
+
+                    return g;
+                })
+                .ToList();
+
+            return scenario;
         }
 
         private void SyncGroups(Scenario existing, Scenario updated)

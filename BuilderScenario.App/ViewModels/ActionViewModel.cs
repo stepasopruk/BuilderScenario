@@ -7,6 +7,16 @@ namespace BuilderScenario.App.ViewModels
     {
         public ActionItem Model { get; }
 
+        public int Id
+        {
+            get => Model.Id;
+            set
+            {
+                Model.Id = value;
+                OnPropertyChanged();
+            }
+        }
+
         public string Name
         {
             get => Model.Name;

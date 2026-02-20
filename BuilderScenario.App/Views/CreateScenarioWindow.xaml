@@ -1,139 +1,513 @@
-﻿<Window x:Class="BuilderScenario.App.Views.CreateScenarioWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
-        Title="Создание сценария"
-        Height="600"
-        Width="500">
-
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="15">
-
-            <!-- Название сценария -->
-            <TextBox Text="{Binding ScenarioName}"
-                     Height="35"
-                     Margin="0 0 0 15"/>
-
-            <!-- Список групп -->
-            <ItemsControl ItemsSource="{Binding Groups}"
-                          dd:DragDrop.IsDragSource="True"
-                          dd:DragDrop.IsDropTarget="True"
-                          dd:DragDrop.UseDefaultDragAdorner="True">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderBrush="Gray"
-                    BorderThickness="1"
-                    CornerRadius="5"
-                    Margin="0 0 0 15"
-                    Padding="10">
-
-                            <StackPanel>
-
-                                <!-- Название группы -->
-                                <TextBox Text="{Binding Name,
-                                                UpdateSourceTrigger=PropertyChanged,
-                                                ValidatesOnNotifyDataErrors=True}"
-                             Height="30"
-                             Margin="0 0 0 10"/>
-
-                                <!-- Шаги -->
-                                <ItemsControl ItemsSource="{Binding Steps}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border BorderBrush="LightGray"
-                                        BorderThickness="1"
-                                        CornerRadius="5"
-                                        Margin="0 0 0 10"
-                                        Padding="10">
-
-                                                <StackPanel>
-
-                                                    <!-- Название шага -->
-                                                    <TextBox Text="{Binding Name,
-                                                                    UpdateSourceTrigger=PropertyChanged,
-                                                                    ValidatesOnNotifyDataErrors=True}"
-                                                     Height="28"
-                                                     Margin="0 0 0 10"/>
-
-                                                    <Button Content="Удалить шаг"
-                                                    Margin="0 5 0 0"
-                                                    Command="{Binding DataContext.DeleteStepCommand,
-                                                              RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                    CommandParameter="{Binding}"/>
-
-                                                    <!-- Действия -->
-                                                    <ItemsControl ItemsSource="{Binding Actions}">
-                                                        <ItemsControl.ItemTemplate>
-                                                            <DataTemplate>
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <TextBox Text="{Binding Name,
-                                                                                    UpdateSourceTrigger=PropertyChanged,
-                                                                                    ValidatesOnNotifyDataErrors=True}"
-                                                                     Width="300"
-                                                                     Margin="0 0 5 0"/>
-
-                                                                    <Button Content="X"
-                                                                    Width="30"
-                                                                    Command="{Binding DataContext.DeleteActionCommand,
-                                                                              RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                                    CommandParameter="{Binding}"/>
-                                                                </StackPanel>
-                                                            </DataTemplate>
-                                                        </ItemsControl.ItemTemplate>
-                                                    </ItemsControl>
-
-                                                    <Button Content="Добавить действие"
-                                                Height="30"
-                                                Margin="0 5 0 0"
-                                                Command="{Binding AddActionCommand}"/>
-
-                                                </StackPanel>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-
-                                <Button Content="Добавить шаг"
-                            Height="35"
-                            Margin="0 5 0 0"
-                            Command="{Binding AddStepCommand}"/>
-
-                                <Button Content="Удалить группу"
-                                Margin="0 5 0 0"
-                                Command="{Binding DataContext.DeleteGroupCommand,
-                                            RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="{Binding}"/>
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-
-            <!-- Кнопки -->
-            <Button Content="Добавить группу действий"
-                    Height="40"
-                    Margin="0 10"
-                    Command="{Binding AddGroupCommand}"/>
-
-            <Button Content="Сохранить"
-                    Height="40"
-                    Command="{Binding SaveCommand}"/>
-
-        </StackPanel>
-    </ScrollViewer>
+﻿<Window
+    x:Class="BuilderScenario.App.Views.CreateScenarioWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:dd="clr-namespace:GongSolutions.Wpf.DragDrop;assembly=GongSolutions.Wpf.DragDrop"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:local="clr-namespace:BuilderScenario.App.ViewModels"
+    Title="Создание сценария"
+    Height="750"
+    Width="600"
+    SizeToContent="Manual"
+    Style="{StaticResource MaterialDesignWindow}"
+    WindowStartupLocation="CenterScreen"
+    Background="{DynamicResource MaterialDesignPaper}"
+    FontFamily="{DynamicResource MaterialDesignFont}"
+    TextElement.FontSize="14">
 
     <Window.Resources>
-        <Style TargetType="TextBox">
-            <Style.Triggers>
-                <Trigger Property="Validation.HasError" Value="True">
-                    <Setter Property="BorderBrush" Value="Red"/>
-                    <Setter Property="BorderThickness" Value="2"/>
-                    <Setter Property="ToolTip"
-                    Value="{Binding RelativeSource={RelativeSource Self},
-                            Path=(Validation.Errors)[0].ErrorContent}"/>
-                </Trigger>
-            </Style.Triggers>
+        <!-- Конвертеры и ресурсы -->
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
+        <!-- Стиль для Card с растяжением по ширине -->
+        <Style x:Key="ModernCard" TargetType="materialDesign:Card">
+            <Setter Property="Margin" Value="0 0 0 16"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="UniformCornerRadius" Value="8"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        </Style>
+
+        <!-- Стиль для Drag Handle -->
+        <Style x:Key="DragHandleStyle" TargetType="Border">
+            <Setter Property="Height" Value="4"/>
+            <Setter Property="Background" Value="{DynamicResource PrimaryHueMidBrush}"/>
+            <Setter Property="CornerRadius" Value="8 8 0 0"/>
+            <Setter Property="Cursor" Value="SizeAll"/>
+            <Setter Property="ToolTip" Value="Перетащите для изменения порядка"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+
+        <!-- Стиль для Step Border с растяжением -->
+        <Style x:Key="StepBorderStyle" TargetType="Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Margin" Value="0 0 0 12"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+
+        <!-- Стиль для кнопки удаления -->
+        <Style x:Key="DeleteIconButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
+            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignError}"/>
+            <Setter Property="ToolTip" Value="Удалить"/>
+        </Style>
+
+        <!-- Стиль для ListBoxItem с растяжением -->
+        <Style TargetType="ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+
+        <!-- Стиль для TextBox с растяжением -->
+        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
         </Style>
     </Window.Resources>
 
+    <DockPanel LastChildFill="True" HorizontalAlignment="Stretch">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- Для App Bar -->
+                <RowDefinition Height="*"/>
+                <!-- Для контента -->
+                <RowDefinition Height="Auto"/>
+                <!-- Для Snackbar -->
+            </Grid.RowDefinitions>
+
+            <!-- ===== MODERN APP BAR ===== -->
+        <materialDesign:ColorZone
+            Grid.Row="0"
+            DockPanel.Dock="Top"
+            Padding="16 12">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Левая часть с иконкой и заголовком -->
+                <StackPanel Orientation="Horizontal" Grid.Column="0">
+                    <materialDesign:PackIcon 
+                        Kind="ApplicationBraces" 
+                        Width="28" 
+                        Height="28" 
+                        Foreground="Black"
+                        VerticalAlignment="Center"/>
+
+                    <TextBlock 
+                        Text="Builder Scenario Studio"
+                        FontSize="20"
+                        FontWeight="Medium"
+                        Margin="12 0 0 0"
+                        VerticalAlignment="Center"
+                        Foreground="Black"/>
+                </StackPanel>
+
+                <!-- Правая часть с действиями -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+
+                    <!-- Индикатор статуса -->
+                    <Border Background="#4CAF50" 
+                            CornerRadius="12" 
+                            Padding="8 2"
+                            Margin="0 0 12 0"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="НОВЫЙ" 
+                                   FontSize="11" 
+                                   FontWeight="Bold" 
+                                   Foreground="White"/>
+                    </Border>
+
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            ToolTip="Назад (Esc)"
+                            Command="{Binding GoBackCommand}">
+                        <materialDesign:PackIcon Kind="ArrowLeft" Width="24" Height="24"/>
+                    </Button>
+
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            ToolTip="Сохранить (Ctrl+S)"
+                            Command="{Binding SaveCommand}"
+                            Margin="8 0 0 0">
+                        <materialDesign:PackIcon Kind="ContentSave" Width="24" Height="24"/>
+                    </Button>
+
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            ToolTip="Просмотр"
+                            Command="{Binding PreviewCommand}"
+                            Margin="8 0 0 0">
+                        <materialDesign:PackIcon Kind="Eye" Width="24" Height="24"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:ColorZone>
+
+        <!-- ===== MAIN CONTENT ===== -->
+
+        <ScrollViewer 
+            Grid.Row="1" 
+    VerticalScrollBarVisibility="Auto"
+    HorizontalScrollBarVisibility="Disabled"
+    Padding="24"
+    Background="{DynamicResource MaterialDesignPaper}"
+    HorizontalAlignment="Stretch"  
+            VerticalAlignment="Stretch">
+
+
+            <StackPanel 
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Top"
+                MaxWidth="1200">
+
+                <!-- Хлебные крошки -->
+                <TextBlock Margin="0 0 0 16" 
+                           FontSize="13" 
+                           Foreground="{DynamicResource MaterialDesignBodyLight}"
+                           HorizontalAlignment="Left">
+                    <Run Text="Главная" FontWeight="Medium"/>
+                    <Run Text=" / "/>
+                    <Run Text="Создание сценария"/>
+                </TextBlock>
+
+                <!-- ===== ЗАГОЛОВОК И МЕТАДАННЫЕ ===== -->
+                <materialDesign:Card Padding="24" 
+                                     Margin="0 0 0 24" 
+                                     UniformCornerRadius="12"
+                                     HorizontalAlignment="Stretch">
+
+                    <StackPanel HorizontalAlignment="Stretch">
+
+                        <TextBlock Text="Основная информация" 
+                                   FontSize="16" 
+                                   FontWeight="Medium"
+                                   Margin="0 0 0 16"
+                                   HorizontalAlignment="Left"/>
+
+                        <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Иконка -->
+                            <materialDesign:PackIcon 
+                                Grid.Row="0" 
+                                Grid.Column="0"
+                                Kind="FormatTitle" 
+                                Width="24" 
+                                Height="24" 
+                                Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                VerticalAlignment="Center"
+                                Margin="0 0 12 0"/>
+
+                            <!-- Поле названия -->
+                            <TextBox Grid.Row="0" 
+                                     Grid.Column="1"
+                                     Text="{Binding ScenarioName, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                     materialDesign:HintAssist.Hint="Введите название сценария"
+                                     materialDesign:HintAssist.Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     FontSize="20"
+                                     FontWeight="Medium"
+                                     Padding="0 8 0 8"
+                                     HorizontalAlignment="Stretch"/>
+
+                            <!-- Доп. информация -->
+                            <TextBlock Grid.Row="1" 
+                                       Grid.Column="1"
+                                       Text="{Binding ElementName=GroupsList, Path=Items.Count, StringFormat='Групп: {0}'}"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                       Margin="0 4 0 0"
+                                       HorizontalAlignment="Left"/>
+                        </Grid>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- ===== ГРУППЫ ДЕЙСТВИЙ ===== -->
+                <TextBlock Text="Группы действий" 
+                           FontSize="18" 
+                           FontWeight="Medium"
+                           Margin="0 0 0 16"
+                           HorizontalAlignment="Left"/>
+
+                <ListBox x:Name="GroupsList"
+                         ItemsSource="{Binding Groups}"
+                         SelectedItem="{Binding SelectedGroup}"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         dd:DragDrop.IsDragSource="True"
+                         dd:DragDrop.IsDropTarget="True"
+                         dd:DragDrop.DropHandler="{Binding GroupDropHandler}"
+                         dd:DragDrop.UseDefaultDragAdorner="True"
+                         dd:DragDrop.DropTargetAdornerBrush="{DynamicResource PrimaryHueMidBrush}"
+                         HorizontalAlignment="Stretch"
+                         HorizontalContentAlignment="Stretch">
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+
+                            <!-- ГРУППА КАРТОЧКА -->
+                            <materialDesign:Card Style="{StaticResource ModernCard}"
+                                                 HorizontalAlignment="Stretch">
+
+                                <Grid HorizontalAlignment="Stretch">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <!-- Drag Handle -->
+                                    <Border Style="{StaticResource DragHandleStyle}"
+                                            dd:DragDrop.IsDragSource="True"
+                                            dd:DragDrop.IsDropTarget="False"
+                                            HorizontalAlignment="Stretch"/>
+
+                                    <!-- Контент -->
+                                    <StackPanel Grid.Row="1" 
+                                                Margin="0 16 0 0"
+                                                HorizontalAlignment="Stretch">
+
+                                        <!-- Шапка группы -->
+                                        <Grid Margin="0 0 0 16"
+                                              HorizontalAlignment="Stretch">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <materialDesign:PackIcon 
+                                                Grid.Column="0"
+                                                Kind="FolderMultiple" 
+                                                Width="24" 
+                                                Height="24" 
+                                                Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                VerticalAlignment="Center"
+                                                Margin="0 0 12 0"/>
+
+                                            <TextBox Grid.Column="1"
+                                                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                                     materialDesign:HintAssist.Hint="Название группы"
+                                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                                     FontWeight="Medium"
+                                                     Padding="0 4 0 4"
+                                                     HorizontalAlignment="Stretch"/>
+
+                                            <!-- Счетчик шагов -->
+                                            <Border Grid.Column="2"
+                                                    Background="{DynamicResource MaterialDesignChipBackground}"
+                                                    CornerRadius="12"
+                                                    Padding="8 2"
+                                                    Margin="12 0 0 0"
+                                                    HorizontalAlignment="Right">
+                                                <TextBlock FontSize="11" Foreground="{DynamicResource MaterialDesignBodyLight}">
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} шагов">
+                                                            <Binding Path="Steps.Count"/>
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </Border>
+                                        </Grid>
+
+                                        <!-- ШАГИ -->
+                                        <ListBox ItemsSource="{Binding Steps}"
+                                                 BorderThickness="0"
+                                                 Background="Transparent"
+                                                 dd:DragDrop.IsDragSource="True"
+                                                 dd:DragDrop.IsDropTarget="True"
+                                                 dd:DragDrop.DropHandler="{Binding StepDropHandler}"
+                                                 dd:DragDrop.UseDefaultDragAdorner="True"
+                                                 Margin="16 0 0 0"
+                                                 HorizontalAlignment="Stretch"
+                                                 HorizontalContentAlignment="Stretch">
+
+                                            <ListBox.ItemTemplate>
+                                                <DataTemplate>
+
+                                                    <!-- ШАГ КАРТОЧКА -->
+                                                    <Border Style="{StaticResource StepBorderStyle}"
+                                                            HorizontalAlignment="Stretch">
+
+                                                        <StackPanel HorizontalAlignment="Stretch">
+
+                                                            <!-- Шапка шага -->
+                                                            <Grid Margin="0 0 0 12"
+                                                                  HorizontalAlignment="Stretch">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <materialDesign:PackIcon 
+                                                                    Grid.Column="0"
+                                                                    Kind="PlaylistCheck" 
+                                                                    Width="18" 
+                                                                    Height="18" 
+                                                                    Foreground="{DynamicResource PrimaryHueMidBrush}"
+                                                                    VerticalAlignment="Center"
+                                                                    Margin="0 0 8 0"/>
+
+                                                                <TextBox Grid.Column="1"
+                                                                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                                                         materialDesign:HintAssist.Hint="Название шага"
+                                                                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                                                         FontSize="13"
+                                                                         Padding="0 2 0 2"
+                                                                         HorizontalAlignment="Stretch"/>
+
+                                                                <!-- Кнопка удалить шаг -->
+                                                                <Button Grid.Column="2"
+                                                                        Style="{StaticResource DeleteIconButtonStyle}"
+                                                                        Command="{Binding DataContext.DeleteStepCommand, 
+                                                                                RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                                                        CommandParameter="{Binding}"
+                                                                        Margin="8 0 0 0"
+                                                                        HorizontalAlignment="Right">
+                                                                    <materialDesign:PackIcon Kind="Delete" Width="18" Height="18"/>
+                                                                </Button>
+                                                            </Grid>
+
+                                                            <!-- ДЕЙСТВИЯ -->
+                                                            <ItemsControl ItemsSource="{Binding Actions}"
+                                                                          Margin="16 0 0 0"
+                                                                          HorizontalAlignment="Stretch">
+
+                                                                <ItemsControl.ItemTemplate>
+                                                                    <DataTemplate>
+
+                                                                        <Grid Margin="0 0 0 8"
+                                                                              HorizontalAlignment="Stretch">
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="Auto"/>
+                                                                                <ColumnDefinition Width="*"/>
+                                                                                <ColumnDefinition Width="Auto"/>
+                                                                            </Grid.ColumnDefinitions>
+
+                                                                            <materialDesign:PackIcon 
+                                                                                Grid.Column="0"
+                                                                                Kind="CheckCircle" 
+                                                                                Width="14" 
+                                                                                Height="14" 
+                                                                                Foreground="#4CAF50"
+                                                                                VerticalAlignment="Center"
+                                                                                Margin="0 0 8 0"/>
+
+                                                                            <TextBox Grid.Column="1"
+                                                                                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, ValidatesOnNotifyDataErrors=True}"
+                                                                                     materialDesign:HintAssist.Hint="Действие"
+                                                                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                                                                     FontSize="12"
+                                                                                     Padding="0 2 0 2"
+                                                                                     HorizontalAlignment="Stretch"/>
+
+                                                                            <!-- Кнопка удалить действие -->
+                                                                            <Button Grid.Column="2"
+                                                                                    Style="{StaticResource DeleteIconButtonStyle}"
+                                                                                    Command="{Binding DataContext.DeleteActionCommand, 
+                                                                                            RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                                    CommandParameter="{Binding}"
+                                                                                    Margin="8 0 0 0"
+                                                                                    HorizontalAlignment="Right">
+                                                                                <materialDesign:PackIcon Kind="Close" Width="14" Height="14"/>
+                                                                            </Button>
+                                                                        </Grid>
+                                                                    </DataTemplate>
+                                                                </ItemsControl.ItemTemplate>
+                                                            </ItemsControl>
+
+                                                            <!-- Кнопка Добавить действие -->
+                                                            <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                                                    Command="{Binding AddActionCommand}"
+                                                                    HorizontalAlignment="Left"
+                                                                    Margin="16 8 0 0">
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <materialDesign:PackIcon Kind="Plus" Width="16" Height="16" Margin="0 0 4 0"/>
+                                                                    <TextBlock Text="Добавить действие" FontSize="12"/>
+                                                                </StackPanel>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ListBox.ItemTemplate>
+                                        </ListBox>
+
+                                        <!-- Кнопка Добавить шаг -->
+                                        <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                                Command="{Binding AddStepCommand}"
+                                                Margin="16 8 0 16"
+                                                HorizontalAlignment="Left">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="PlusCircle" Width="18" Height="18" Margin="0 0 8 0"/>
+                                                <TextBlock Text="Добавить шаг" FontWeight="Medium"/>
+                                            </StackPanel>
+                                        </Button>
+
+                                        <!-- Кнопка Удалить группу -->
+                                        <Button Style="{StaticResource MaterialDesignFlatButton}"
+                                                Command="{Binding DataContext.DeleteGroupCommand,
+                                                        RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                HorizontalAlignment="Right">
+                                            <StackPanel Orientation="Horizontal">
+                                                <materialDesign:PackIcon Kind="Delete" Width="18" Height="18" Foreground="{DynamicResource MaterialDesignError}"/>
+                                                <TextBlock Text="Удалить группу" 
+                                                           Foreground="{DynamicResource MaterialDesignError}"
+                                                           Margin="4 0 0 0"/>
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </materialDesign:Card>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- ===== БЛОК ДЕЙСТВИЙ ===== -->
+                <materialDesign:Card Padding="24" 
+                                     Margin="0 16 0 0" 
+                                     UniformCornerRadius="12"
+                                     HorizontalAlignment="Stretch">
+                    <StackPanel HorizontalAlignment="Stretch">
+
+                        <Button Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Command="{Binding AddGroupCommand}"
+                                Height="48"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="FolderPlus" Width="20" Height="20" Margin="0 0 8 0"/>
+                                <TextBlock Text="Создать новую группу действий" FontWeight="Medium"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </materialDesign:Card>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ===== SNACKBAR ДЛЯ УВЕДОМЛЕНИЙ ===== -->
+        <materialDesign:Snackbar
+            x:Name="MainSnackbar"
+            MessageQueue="{Binding SnackbarMessageQueue}"
+            DockPanel.Dock="Bottom"/>
+
+            <materialDesign:Snackbar Grid.Row="2"/>
+        </Grid>
+        
+    </DockPanel>
 </Window>

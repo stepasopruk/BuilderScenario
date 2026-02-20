@@ -1,6 +1,8 @@
 ﻿using BuilderScenario.App.Common;
 using BuilderScenario.Core.Entities;
+using GongSolutions.Wpf.DragDrop;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 
 namespace BuilderScenario.App.ViewModels
@@ -8,6 +10,16 @@ namespace BuilderScenario.App.ViewModels
     public class StepViewModel : BaseViewModel
     {
         public StepItem Model { get; }
+
+        public int Id
+        {
+            get => Model.Id;
+            set
+            {
+                Model.Id = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string Name
         {
@@ -20,8 +32,18 @@ namespace BuilderScenario.App.ViewModels
             }
         }
 
-        public ObservableCollection<ActionViewModel> Actions { get; }
-            = new();
+        public int Order
+        {
+            get => Model.Order;
+            set
+            {
+                Model.Order = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public IDropTarget ActionDropHandler { get; }
+        public ObservableCollection<ActionViewModel> Actions { get; set; } = new();
 
         public RelayCommand AddActionCommand { get; }
         public RelayCommand DeleteActionCommand { get; }
@@ -32,6 +54,7 @@ namespace BuilderScenario.App.ViewModels
         {
             Model = model;
             _parent = parent;
+            ActionDropHandler = new ActionDropHandler();
 
             foreach (var action in model.Actions)
                 Actions.Add(new ActionViewModel(action, _parent));
@@ -41,15 +64,15 @@ namespace BuilderScenario.App.ViewModels
             ValidateName();
 
             PropertyChanged += (_, __) => _parent.NotifyStateChanged();
-            Actions.CollectionChanged += (_, __) => RecalculateActionOrder();
+            Actions.CollectionChanged += Actions_CollectionChanged;
         }
 
-        public void RecalculateActionOrder()
+        private void Actions_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             for (int i = 0; i < Actions.Count; i++)
-                Actions[i].Model.Order = i;
-
-            _parent.NotifyStateChanged();
+            {
+                Actions[i].Order = i;
+            }
         }
 
         private void AddAction()

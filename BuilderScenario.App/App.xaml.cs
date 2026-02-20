@@ -3,10 +3,12 @@ using BuilderScenario.App.Views;
 using BuilderScenario.Application.Interfaces;
 using BuilderScenario.Infrastructure.Data;
 using BuilderScenario.Infrastructure.Services;
+using MaterialDesignThemes.Wpf;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 
 namespace BuilderScenario.App
 {
