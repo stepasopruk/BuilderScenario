@@ -51,6 +51,8 @@ namespace BuilderScenario.App
             services.AddScoped<ScenarioRepository>();
             services.AddTransient<ScenarioListViewModel>();
             services.AddTransient<ScenarioListWindow>();
+            services.AddScoped<IJsonExportService, JsonExportService>();
+            services.AddScoped<DocxImportService>();
         }
     }
 }

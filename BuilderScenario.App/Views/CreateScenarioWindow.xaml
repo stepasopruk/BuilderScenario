@@ -129,8 +129,8 @@
 
                     <Button Style="{StaticResource MaterialDesignIconButton}"
                             ToolTip="Назад (Esc)"
-                            Command="{Binding GoBackCommand}">
-                        <materialDesign:PackIcon Kind="ArrowLeft" Width="24" Height="24"/>
+                            Command="{Binding ExportCommand}">
+                        <materialDesign:PackIcon Kind="Export" Width="24" Height="24"/>
                     </Button>
 
                     <Button Style="{StaticResource MaterialDesignIconButton}"
@@ -254,7 +254,8 @@
                          dd:DragDrop.UseDefaultDragAdorner="True"
                          dd:DragDrop.DropTargetAdornerBrush="{DynamicResource PrimaryHueMidBrush}"
                          HorizontalAlignment="Stretch"
-                         HorizontalContentAlignment="Stretch">
+                         HorizontalContentAlignment="Stretch"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
 
                     <ListBox.ItemTemplate>
                         <DataTemplate>

@@ -9,6 +9,9 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace BuilderScenario.App.ViewModels
 {
@@ -48,19 +51,22 @@ namespace BuilderScenario.App.ViewModels
 
         public RelayCommand AddGroupCommand { get; }
         public RelayCommand SaveCommand { get; }
+        public RelayCommand ExportCommand { get; }
 
         private readonly ScenarioRepository _repository;
+        private readonly IJsonExportService _jsonExportService;
 
-        public CreateScenarioViewModel(ScenarioRepository repository)
+        public CreateScenarioViewModel(ScenarioRepository repository, IJsonExportService jsonExportService)
         {
             _repository = repository;
+            _jsonExportService = jsonExportService;
+            
             Scenario = new Scenario();
 
             AddGroupCommand = new RelayCommand(_ => AddGroup());
-
             SaveCommand = new RelayCommand(async _ => await SaveAsync(), _ => CanSave());
-
             DeleteGroupCommand = new RelayCommand(DeleteGroup);
+            ExportCommand = new RelayCommand(async _ => await ExportAsync());
 
             Groups.CollectionChanged += (_, __) => SaveCommand.RaiseCanExecuteChanged();
             Groups.CollectionChanged += Groups_CollectionChanged;
@@ -75,6 +81,7 @@ namespace BuilderScenario.App.ViewModels
             foreach (var group in scenario.Groups)
                 Groups.Add(new ActionGroupViewModel(group, this));
 
+            ScenarioName = scenario.Name;
             NotifyStateChanged();
         }
 
@@ -222,6 +229,31 @@ namespace BuilderScenario.App.ViewModels
         {
             for (int i = 0; i < Groups.Count; i++)
                 Groups[i].Model.Order = i;
+        }
+
+        private async Task ExportAsync()
+        {
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "JSON files (*.json)|*.json",
+                FileName = $"{ScenarioName}.json"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var scenario = BuildScenarioFromViewModel();
+
+                    await _jsonExportService.ExportAsync(scenario, dialog.FileName);
+
+                    SnackbarMessageQueue.Enqueue("Сценарий успешно экспортирован");
+                }
+                catch (Exception ex)
+                {
+                    SnackbarMessageQueue.Enqueue("Ошибка при экспорте");
+                }
+            }
         }
     }
 }

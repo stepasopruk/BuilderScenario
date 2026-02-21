@@ -23,7 +23,7 @@
         <Button Content="Загрузить сценарий"
                 Height="40"
                 Margin="0 10"
-                Command="{Binding LoadScenarioCommand}"/>
+                Command="{Binding ImportDocxCommand}"/>
 
     </StackPanel>
 
