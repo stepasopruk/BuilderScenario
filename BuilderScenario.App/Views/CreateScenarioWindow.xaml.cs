@@ -1,5 +1,6 @@
 ﻿using BuilderScenario.App.ViewModels;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -14,6 +15,23 @@ namespace BuilderScenario.App.Views
         {
             InitializeComponent();
             DataContext = viewModel;
+
+            // Добавляем обработчик для перетаскивания
+            this.PreviewDragOver += (s, e) =>
+            {
+                Point mousePos = e.GetPosition(MainScrollViewer);
+
+                if (mousePos.Y < 30)
+                {
+                    MainScrollViewer.ScrollToVerticalOffset(
+                        MainScrollViewer.VerticalOffset - 20);
+                }
+                else if (mousePos.Y > MainScrollViewer.ActualHeight - 30)
+                {
+                    MainScrollViewer.ScrollToVerticalOffset(
+                        MainScrollViewer.VerticalOffset + 20);
+                }
+            };
         }
 
         private void ToggleTree_Click(object sender, RoutedEventArgs e)
@@ -31,21 +49,12 @@ namespace BuilderScenario.App.Views
             _treeVisible = !_treeVisible;
         }
 
-        private void OnPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        private void Grid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-
-                e.Handled = true;
-
-                var eventArg = new MouseWheelEventArgs(
-                    e.MouseDevice,
-                    e.Timestamp,
-                    e.Delta);
-
-                eventArg.RoutedEvent = UIElement.MouseWheelEvent;
-                eventArg.Source = sender;
-
-                this.RaiseEvent(eventArg);
-
+            // Прокручиваем всегда, независимо от того, где мышь
+            MainScrollViewer.ScrollToVerticalOffset(
+                MainScrollViewer.VerticalOffset - e.Delta);
+            e.Handled = true;
         }
 
         private void NavigationTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)

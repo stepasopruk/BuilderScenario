@@ -13,8 +13,7 @@
     WindowStartupLocation="CenterScreen"
     Background="{DynamicResource MaterialDesignPaper}"
     FontFamily="{DynamicResource MaterialDesignFont}"
-    TextElement.FontSize="14"
-    PreviewMouseWheel="OnPreviewMouseWheel">
+    TextElement.FontSize="14">
 
     <Window.Resources>
         <!-- Конвертеры и ресурсы -->
@@ -83,38 +82,38 @@
             </Grid.RowDefinitions>
 
             <!-- ===== MODERN APP BAR ===== -->
-        <materialDesign:ColorZone
+            <materialDesign:ColorZone
             Grid.Row="0"
             DockPanel.Dock="Top"
             Padding="16 12">
 
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <!-- Левая часть с иконкой и заголовком -->
-                <StackPanel Orientation="Horizontal" Grid.Column="0">
-                    <materialDesign:PackIcon 
+                    <!-- Левая часть с иконкой и заголовком -->
+                    <StackPanel Orientation="Horizontal" Grid.Column="0">
+                        <materialDesign:PackIcon 
                         Kind="ApplicationBraces" 
                         Width="28" 
                         Height="28" 
                         Foreground="Black"
                         VerticalAlignment="Center"/>
 
-                    <TextBlock 
+                        <TextBlock 
                         Text="Builder Scenario Studio"
                         FontSize="20"
                         FontWeight="Medium"
                         Margin="12 0 0 0"
                         VerticalAlignment="Center"
                         Foreground="Black"/>
-                </StackPanel>
+                    </StackPanel>
 
-                <!-- Правая часть с действиями -->
-                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <!-- Правая часть с действиями -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
 
                         <Button Style="{StaticResource MaterialDesignIconButton}"
                                 ToolTip="Дерево сценария"
@@ -128,24 +127,24 @@
                             <materialDesign:PackIcon Kind="Export" Width="24" Height="24"/>
                         </Button>
 
-                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
                             ToolTip="Сохранить (Ctrl+S)"
                             Command="{Binding SaveCommand}"
                             Margin="8 0 0 0">
-                        <materialDesign:PackIcon Kind="ContentSave" Width="24" Height="24"/>
-                    </Button>
+                            <materialDesign:PackIcon Kind="ContentSave" Width="24" Height="24"/>
+                        </Button>
 
-                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                        <Button Style="{StaticResource MaterialDesignIconButton}"
                             ToolTip="Просмотр"
                             Command="{Binding PreviewCommand}"
                             Margin="8 0 0 0">
-                        <materialDesign:PackIcon Kind="Eye" Width="24" Height="24"/>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </materialDesign:ColorZone>
+                            <materialDesign:PackIcon Kind="Eye" Width="24" Height="24"/>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </materialDesign:ColorZone>
 
-        <!-- ===== MAIN CONTENT ===== -->
+            <!-- ===== MAIN CONTENT ===== -->
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -195,7 +194,7 @@
 
                 <Border Grid.Column="1"
                 Background="#E0E0E0"/>
-                
+
                 <ScrollViewer
                     x:Name="MainScrollViewer"
                     Grid.Column="2"
@@ -204,7 +203,9 @@
                     Padding="24"
                     Background="{DynamicResource MaterialDesignPaper}"
                     HorizontalAlignment="Stretch"  
-                    VerticalAlignment="Stretch">
+                    VerticalAlignment="Stretch"
+                    ScrollViewer.CanContentScroll="False"
+                    PreviewMouseWheel="Grid_PreviewMouseWheel">
 
 
                     <StackPanel 
@@ -299,8 +300,7 @@
                          dd:DragDrop.UseDefaultDragAdorner="True"
                          dd:DragDrop.DropTargetAdornerBrush="{DynamicResource PrimaryHueMidBrush}"
                          HorizontalAlignment="Stretch"
-                         HorizontalContentAlignment="Stretch"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                         HorizontalContentAlignment="Stretch">
 
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
@@ -552,16 +552,16 @@
                         </materialDesign:Card>
                     </StackPanel>
                 </ScrollViewer>
-                
+
             </Grid>
             <!-- ===== SNACKBAR ДЛЯ УВЕДОМЛЕНИЙ ===== -->
-        <materialDesign:Snackbar
+            <materialDesign:Snackbar
             x:Name="MainSnackbar"
             MessageQueue="{Binding SnackbarMessageQueue}"
             DockPanel.Dock="Bottom"/>
 
             <materialDesign:Snackbar Grid.Row="2"/>
         </Grid>
-        
+
     </DockPanel>
 </Window>
