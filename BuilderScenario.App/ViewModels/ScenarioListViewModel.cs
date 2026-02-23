@@ -10,7 +10,7 @@ namespace BuilderScenario.App.ViewModels
 {
     public class ScenarioListViewModel : BaseViewModel
     {
-        private readonly ScenarioRepository _repository;
+        private readonly ScenarioApiClient _apiClient;
         private readonly IServiceProvider _provider;
 
         public ObservableCollection<Scenario> Scenarios { get; }
@@ -20,10 +20,10 @@ namespace BuilderScenario.App.ViewModels
         public RelayCommand OpenCommand { get; }
 
         public ScenarioListViewModel(
-            ScenarioRepository repository,
+            ScenarioApiClient apiClient,
             IServiceProvider provider)
         {
-            _repository = repository;
+            _apiClient = apiClient;
             _provider = provider;
 
             RefreshCommand = new RelayCommand(async _ => await LoadAsync());
@@ -39,7 +39,7 @@ namespace BuilderScenario.App.ViewModels
         {
             Scenarios.Clear();
 
-            var list = await _repository.GetAllAsync();
+            var list = await _apiClient.GetAllAsync();
 
             foreach (var scenario in list)
                 Scenarios.Add(scenario);
@@ -52,7 +52,7 @@ namespace BuilderScenario.App.ViewModels
             if (parameter is not Scenario scenario)
                 return;
 
-            var fullScenario = await _repository.GetByIdAsync(scenario.Id);
+            var fullScenario = await _apiClient.GetAsync(scenario.Id);
             if (fullScenario == null)
                 return;
 

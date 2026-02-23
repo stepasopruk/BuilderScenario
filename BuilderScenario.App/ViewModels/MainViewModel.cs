@@ -14,18 +14,18 @@ namespace BuilderScenario.App.ViewModels
 
         private readonly IServiceProvider _serviceProvider;
         private readonly DocxImportService _docxImportService;
-        private readonly ScenarioRepository _repository;
+        private readonly ScenarioApiClient _apiClient;
         private readonly IJsonExportService _jsonExportService;
 
         public MainViewModel(
             IServiceProvider serviceProvider, 
             DocxImportService docxImportService,
-            ScenarioRepository repository,
+            ScenarioApiClient apiClient,
             IJsonExportService jsonExportService)
         {
             _serviceProvider = serviceProvider;
             _docxImportService = docxImportService;
-            _repository = repository;
+            _apiClient = apiClient;
             _jsonExportService = jsonExportService;
 
             CreateScenarioCommand = new RelayCommand(_ =>
@@ -55,7 +55,7 @@ namespace BuilderScenario.App.ViewModels
 
             var scenario = _docxImportService.Import(dialog.FileName);
 
-            var vm = new CreateScenarioViewModel(_repository, _jsonExportService);
+            var vm = new CreateScenarioViewModel(_apiClient, _jsonExportService);
             var window = new CreateScenarioWindow(vm);
 
             vm.LoadScenario(scenario);

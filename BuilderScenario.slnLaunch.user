@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Новый профиль",
+    "Projects": [
+      {
+        "Path": "BuilderScenario.App\\BuilderScenario.App.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "BuilderScenario.Api\\BuilderScenario.Api.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

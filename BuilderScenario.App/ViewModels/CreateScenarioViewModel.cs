@@ -53,12 +53,12 @@ namespace BuilderScenario.App.ViewModels
         public RelayCommand SaveCommand { get; }
         public RelayCommand ExportCommand { get; }
 
-        private readonly ScenarioRepository _repository;
+        private readonly ScenarioApiClient _apiClient;
         private readonly IJsonExportService _jsonExportService;
 
-        public CreateScenarioViewModel(ScenarioRepository repository, IJsonExportService jsonExportService)
+        public CreateScenarioViewModel(ScenarioApiClient apiClient, IJsonExportService jsonExportService)
         {
-            _repository = repository;
+            _apiClient = apiClient;
             _jsonExportService = jsonExportService;
             
             Scenario = new Scenario();
@@ -116,7 +116,7 @@ namespace BuilderScenario.App.ViewModels
         private async Task SaveAsync()
         {
             var scenario = BuildScenarioFromViewModel();
-            await _repository.SaveAsync(scenario);
+            await _apiClient.CreateAsync(scenario);
             SnackbarMessageQueue.Enqueue("Сценарий сохранён");
         }
 
