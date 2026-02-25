@@ -9,6 +9,10 @@
       {
         "Path": "BuilderScenario.Api\\BuilderScenario.Api.csproj",
         "Action": "Start"
+      },
+      {
+        "Path": "BuilderScenario.Api.Tests\\BuilderScenario.Api.Tests.csproj",
+        "Action": "Start"
       }
     ]
   }

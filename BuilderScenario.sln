@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuilderScenario.Application
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuilderScenario.Api", "BuilderScenario.Api\BuilderScenario.Api.csproj", "{4F493233-304C-4813-A9BD-4D29C1777C85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuilderScenario.Api.Tests", "BuilderScenario.Api.Tests\BuilderScenario.Api.Tests.csproj", "{2CCDDF84-E202-42C3-B8C8-3B5858960CB2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{4F493233-304C-4813-A9BD-4D29C1777C85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F493233-304C-4813-A9BD-4D29C1777C85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F493233-304C-4813-A9BD-4D29C1777C85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CCDDF84-E202-42C3-B8C8-3B5858960CB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CCDDF84-E202-42C3-B8C8-3B5858960CB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CCDDF84-E202-42C3-B8C8-3B5858960CB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CCDDF84-E202-42C3-B8C8-3B5858960CB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

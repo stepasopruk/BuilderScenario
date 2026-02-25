@@ -59,6 +59,8 @@ namespace BuilderScenario.Api.Controllers
             _context.Scenarios.Add(scenario);
             await _context.SaveChangesAsync();
 
+            //await _context.Scenarios.AddAsync(scenario);
+
             // Маппим обратно в DTO для ответа
             var scenarioDto = _mapper.Map<ScenarioDto>(scenario);
 
