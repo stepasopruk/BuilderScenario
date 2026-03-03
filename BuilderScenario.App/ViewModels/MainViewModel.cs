@@ -1,7 +1,10 @@
 ﻿using BuilderScenario.App.Common;
+using BuilderScenario.App.Services;
 using BuilderScenario.App.Views;
 using BuilderScenario.Infrastructure.Services;
+using MaterialDesignThemes.Wpf;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using System.Windows;
 
 namespace BuilderScenario.App.ViewModels
@@ -13,20 +16,20 @@ namespace BuilderScenario.App.ViewModels
         public RelayCommand OpenScenarioListCommand { get; }
 
         private readonly IServiceProvider _serviceProvider;
-        private readonly DocxImportService _docxImportService;
         private readonly ScenarioApiClient _apiClient;
-        private readonly IJsonExportService _jsonExportService;
+        private readonly ImportServiceClient _importClient;
+        private readonly ExportServiceClient _exportClient;
 
         public MainViewModel(
-            IServiceProvider serviceProvider, 
-            DocxImportService docxImportService,
+            IServiceProvider serviceProvider,
             ScenarioApiClient apiClient,
-            IJsonExportService jsonExportService)
+            ImportServiceClient importClient,
+            ExportServiceClient exportClient)
         {
             _serviceProvider = serviceProvider;
-            _docxImportService = docxImportService;
+            _exportClient = exportClient;
             _apiClient = apiClient;
-            _jsonExportService = jsonExportService;
+            _importClient = importClient;
 
             CreateScenarioCommand = new RelayCommand(_ =>
             {
@@ -40,28 +43,47 @@ namespace BuilderScenario.App.ViewModels
                 window.Show();
             });
 
-            ImportDocxCommand = new RelayCommand(_ => ImportDocx());
+            ImportDocxCommand = new RelayCommand(async _ => await ImportAsync());
         }
 
-        private void ImportDocx()
+        // Метод для импорта
+        private async Task ImportAsync()
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog
+            var dialog = new OpenFileDialog
             {
-                Filter = "Word Document (*.docx)|*.docx"
+                Filter = "Все поддерживаемые форматы (*.docx;*.json;*.xml)|*.docx;*.json;*.xml|" +
+                        "Word документы (*.docx)|*.docx|" +
+                        "JSON файлы (*.json)|*.json|" +
+                        "XML файлы (*.xml)|*.xml",
+                Multiselect = false,
+                Title = "Выберите файл для импорта"
             };
 
             if (dialog.ShowDialog() != true)
                 return;
 
-            var scenario = _docxImportService.Import(dialog.FileName);
+            SnackbarMessageQueue snackbarMessageQueue = new SnackbarMessageQueue();
 
-            var vm = new CreateScenarioViewModel(_apiClient, _jsonExportService);
-            var window = new CreateScenarioWindow(vm);
+            try
+            {
+                var importedScenario = await _importClient.ImportFromFileAsync(dialog.FileName);
+                var vm = new CreateScenarioViewModel(_apiClient, _exportClient);
+                var window = new CreateScenarioWindow(vm);
+                vm.LoadScenario(importedScenario);
 
-            vm.LoadScenario(scenario);
+                window.DataContext = vm;
+                window.ShowDialog();
 
-            window.DataContext = vm;
-            window.ShowDialog();
+                snackbarMessageQueue.Enqueue("Сценарий успешно импортирован");
+            }
+            catch (Exception ex)
+            {
+                snackbarMessageQueue.Enqueue($"Ошибка импорта: {ex.Message}");
+
+                // Показываем детали в отдельном окне
+                MessageBox.Show($"Детали ошибки:\n{ex}", "Ошибка импорта",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

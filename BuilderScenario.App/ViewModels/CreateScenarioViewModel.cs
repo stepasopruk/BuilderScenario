@@ -1,17 +1,11 @@
 ﻿using BuilderScenario.App.Common;
-using BuilderScenario.Application.Interfaces;
+using BuilderScenario.App.Services;
 using BuilderScenario.Core.Entities;
-using BuilderScenario.Infrastructure.Services;
 using GongSolutions.Wpf.DragDrop;
 using MaterialDesignThemes.Wpf;
+using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 
 namespace BuilderScenario.App.ViewModels
 {
@@ -54,13 +48,15 @@ namespace BuilderScenario.App.ViewModels
         public RelayCommand ExportCommand { get; }
 
         private readonly ScenarioApiClient _apiClient;
-        private readonly IJsonExportService _jsonExportService;
+        private readonly ExportServiceClient _exportClient;
 
-        public CreateScenarioViewModel(ScenarioApiClient apiClient, IJsonExportService jsonExportService)
+        public CreateScenarioViewModel(
+            ScenarioApiClient apiClient,
+            ExportServiceClient exportClient)
         {
             _apiClient = apiClient;
-            _jsonExportService = jsonExportService;
-            
+            _exportClient = exportClient;
+
             Scenario = new Scenario();
 
             AddGroupCommand = new RelayCommand(_ => AddGroup());
@@ -233,9 +229,10 @@ namespace BuilderScenario.App.ViewModels
 
         private async Task ExportAsync()
         {
-            var dialog = new Microsoft.Win32.SaveFileDialog
+            var dialog = new SaveFileDialog
             {
-                Filter = "JSON files (*.json)|*.json",
+                Filter = "JSON files (*.json)|*.json|XML files (*.xml)|*.xml",
+                DefaultExt = "json",
                 FileName = $"{ScenarioName}.json"
             };
 
@@ -244,14 +241,12 @@ namespace BuilderScenario.App.ViewModels
                 try
                 {
                     var scenario = BuildScenarioFromViewModel();
-
-                    await _jsonExportService.ExportAsync(scenario, dialog.FileName);
-
+                    await _exportClient.ExportToFileAsync(scenario, dialog.FileName);
                     SnackbarMessageQueue.Enqueue("Сценарий успешно экспортирован");
                 }
                 catch (Exception ex)
                 {
-                    SnackbarMessageQueue.Enqueue("Ошибка при экспорте");
+                    SnackbarMessageQueue.Enqueue($"Ошибка экспорта: {ex.Message}");
                 }
             }
         }

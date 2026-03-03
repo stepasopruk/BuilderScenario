@@ -1,11 +1,10 @@
-
-using AutoMapper;
 using BuilderScenario.Api.Mapping;
 using BuilderScenario.Infrastructure.Data;
 using BuilderScenario.Infrastructure.Services;
+using BuilderScenario.Infrastructure.Services.Import;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+using System.Text.Json.Serialization;
 
 namespace BuilderScenario.Api
 {
@@ -15,61 +14,79 @@ namespace BuilderScenario.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddAutoMapper(cfg =>
-            {
-                cfg.AddProfile<ScenarioMappingProfile>();
-            });
+            ConfigureServices(builder.Services, builder.Configuration);
 
-            builder.Services.AddControllers()
+            var app = builder.Build();
+            ConfigurePipeline(app);
+
+            app.Run();
+        }
+
+        private static void ConfigureServices(IServiceCollection services, IConfiguration config)
+        {
+            services.AddControllers()
                 .AddJsonOptions(options =>
                 {
-                    // Решение проблемы с циклическими ссылками
-                    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                     options.JsonSerializerOptions.WriteIndented = true;
-                    options.JsonSerializerOptions.PropertyNamingPolicy = null; // Сохраняем имена свойств как есть
                 });
 
-            // Добавляем CORS
-            builder.Services.AddCors(options =>
+            services.AddCors(options =>
             {
                 options.AddPolicy("AllowDesktopApp", policy =>
                 {
-                    policy.AllowAnyOrigin()      // Разрешаем любой источник (для development)
-                          .AllowAnyMethod()      // Разрешаем любые HTTP методы
-                          .AllowAnyHeader();     // Разрешаем любые заголовки
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
                 });
             });
 
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            services.AddEndpointsApiExplorer();
+            services.AddSwaggerGen();
 
+            // Database
             var dbPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "scenarios.db");
-            builder.Services.AddDbContext<ScenarioDbContext>(options =>
+            services.AddDbContext<ScenarioDbContext>(options =>
                 options.UseSqlite($"Data Source={dbPath}"));
 
-            builder.Services.AddScoped<ScenarioRepository>();
+            services.AddScoped<ScenarioRepository>();
+            services.AddScoped<ImportService>();
+            services.AddScoped<IImportParser, DocxImportParser>();
 
-            var app = builder.Build();
+            services.AddHttpClient("ExportService", client =>
+            {
+                client.BaseAddress = new Uri(config["ExportService:Url"] ?? "http://localhost:44332/");
+            });
 
-            // Configure the HTTP request pipeline.
+            services.Configure<FormOptions>(options =>
+            {
+                options.ValueLengthLimit = int.MaxValue;
+                options.MultipartBodyLengthLimit = int.MaxValue;
+                options.MemoryBufferThreshold = int.MaxValue;
+            });
+
+            services.AddScoped<ExportApiClient>();
+            //services.AddAutoMapper(typeof(Program).Assembly);
+
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<ScenarioMappingProfile>();
+                cfg.AddProfile<ImportMappingProfile>(); // Добавляем профиль для импорта
+            }, typeof(Program).Assembly);
+        }
+
+        private static void ConfigurePipeline(WebApplication app)
+        {
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-            // ВАЖНО: Порядок middleware имеет значение!
-            app.UseCors("AllowDesktopApp");  // CORS должен быть до Authorization и MapControllers
-
+            app.UseCors("AllowDesktopApp");
             app.UseAuthorization();
-
             app.MapControllers();
-
-            // Добавляем простую страницу приветствия для проверки
             app.MapGet("/", () => "BuilderScenario API is running...");
-
-            app.Run();
         }
     }
 }

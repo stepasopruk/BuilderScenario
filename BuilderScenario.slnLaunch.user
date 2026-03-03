@@ -11,7 +11,7 @@
         "Action": "Start"
       },
       {
-        "Path": "BuilderScenario.Api.Tests\\BuilderScenario.Api.Tests.csproj",
+        "Path": "BuilderScenario.ExportService\\BuilderScenario.ExportService.csproj",
         "Action": "Start"
       }
     ]

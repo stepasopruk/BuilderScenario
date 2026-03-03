@@ -18,7 +18,6 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BuilderScenario.Application\BuilderScenario.Application.csproj" />
     <ProjectReference Include="..\BuilderScenario.Core\BuilderScenario.Core.csproj" />
     <ProjectReference Include="..\BuilderScenario.Infrastructure\BuilderScenario.Infrastructure.csproj" />
   </ItemGroup>

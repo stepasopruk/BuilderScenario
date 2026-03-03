@@ -1,4 +1,5 @@
 ﻿using BuilderScenario.App.Common;
+using BuilderScenario.App.Services;
 using BuilderScenario.App.Views;
 using BuilderScenario.Core.Entities;
 using BuilderScenario.Infrastructure.Services;

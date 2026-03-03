@@ -4,6 +4,7 @@ using BuilderScenario.Core.Entities;
 using BuilderScenario.Infrastructure.Data;
 using BuilderScenario.Api.Dtos;
 using Microsoft.EntityFrameworkCore;
+using BuilderScenario.Infrastructure.Services;
 
 namespace BuilderScenario.Api.Controllers
 {
@@ -13,11 +14,13 @@ namespace BuilderScenario.Api.Controllers
     {
         private readonly ScenarioDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ExportApiClient _exportClient;
 
-        public ScenariosController(ScenarioDbContext context, IMapper mapper)
+        public ScenariosController(ScenarioDbContext context, IMapper mapper, ExportApiClient exportClient)
         {
             _context = context;
             _mapper = mapper;
+            _exportClient = exportClient;
         }
 
         // GET: api/scenarios
@@ -109,6 +112,19 @@ namespace BuilderScenario.Api.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpPost("{id}/export")]
+        public async Task<IActionResult> Export(int id)
+        {
+            var scenario = await _context.Scenarios.FindAsync(id);
+
+            if (scenario == null)
+                return NotFound();
+
+            var json = await _exportClient.ExportToJsonAsync(scenario);
+
+            return Ok(json);
         }
     }
 }
