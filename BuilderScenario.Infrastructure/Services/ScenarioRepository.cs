@@ -13,6 +13,10 @@ namespace BuilderScenario.Infrastructure.Services
             _context = context;
         }
 
+        /// <summary>
+        /// Получение всех сценариев с полной иерархией
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<Scenario>> GetAllAsync()
         {
             return await _context.Scenarios
@@ -23,6 +27,11 @@ namespace BuilderScenario.Infrastructure.Services
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Получение конкретного сценария с сортировкой
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<Scenario?> GetByIdAsync(int id)
         {
             var scenario = await _context.Scenarios
@@ -56,6 +65,11 @@ namespace BuilderScenario.Infrastructure.Services
             return scenario;
         }
 
+        /// <summary>
+        /// Добавление нового сценария со сбросом ID
+        /// </summary>
+        /// <param name="scenario"></param>
+        /// <returns></returns>
         public async Task AddAsync(Scenario scenario)
         {
             // Важно: сбрасываем ID, чтобы БД сама назначила новые
@@ -65,6 +79,12 @@ namespace BuilderScenario.Infrastructure.Services
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Обновление существующего сценария с синхронизацией иерархии
+        /// </summary>
+        /// <param name="scenario"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task UpdateAsync(Scenario scenario)
         {
             var existing = await _context.Scenarios
@@ -85,6 +105,11 @@ namespace BuilderScenario.Infrastructure.Services
             await _context.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Удаление сценария
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task DeleteAsync(int id)
         {
             var scenario = await _context.Scenarios.FindAsync(id);
